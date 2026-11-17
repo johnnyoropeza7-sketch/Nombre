@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Nombre en Tus Manos</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#f6f7fb;color:#222}
+header{background:linear-gradient(135deg,#2b1a6e,#6a3de8);color:#fff;padding:20px 12px 16px;text-align:center}
+header svg{width:84px;height:84px;display:block;margin:0 auto 6px}
+header .t{font-size:22px;font-weight:700;letter-spacing:.5px}
+header .s{font-size:13px;opacity:.8;margin-top:2px}
+main{max-width:480px;margin:24px auto;padding:0 16px}
+input{width:100%;box-sizing:border-box;padding:14px;font-size:18px;border:1px solid #ccc;border-radius:10px}
+#b{width:100%;margin-top:12px;padding:14px;font-size:18px;border:0;border-radius:10px;background:#4a4ae0;color:#fff}
+#res{margin-top:20px;padding:16px;background:#fff;border-radius:10px;display:none;line-height:1.5}
+#res h2{margin:0 0 6px}
+#a{position:fixed;bottom:12px;right:12px;opacity:.15;font-size:12px;padding:6px 10px;border:0;border-radius:8px}
+</style>
+</head>
+<body>
+<header>
+<svg viewBox="0 0 100 100" aria-hidden="true">
+<defs>
+<radialGradient id="g" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#fff6c2"/><stop offset="1" stop-color="#f5b82e"/></radialGradient>
+<linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9d6"/><stop offset="1" stop-color="#e8b48a"/></linearGradient>
+</defs>
+<circle cx="50" cy="40" r="26" fill="#fff" opacity=".12"/>
+<path d="M50 14l4.6 9.6 10.4 1.4-7.6 7.3 1.9 10.4L50 37.6l-9.3 5.1 1.9-10.4-7.6-7.3 10.4-1.4z" fill="url(#g)"/>
+<path d="M12 52c8-2 18 2 26 10 4 4 8 8 12 8v14C34 84 18 76 12 52z" fill="url(#h)"/>
+<path d="M88 52c-8-2-18 2-26 10-4 4-8 8-12 8v14c16-0 32-8 38-32z" fill="url(#h)"/>
+<path d="M22 60c6 2 12 6 18 12M78 60c-6 2-12 6-18 12" stroke="#c98d62" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
+<div class="t">El Nombre en Tus Manos</div>
+<div class="s">Descubre el significado de tu nombre</div>
+</header>
+<main>
+<input id="n" placeholder="Escribe el nombre aquí" autocomplete="off" autocapitalize="words">
+<button id="b">Buscar significado</button>
+<div id="res"></div>
+</main>
+<button id="a">audio</button>
+<script>
+// Antes del truco: toca el botón "audio" (casi invisible, abajo a la derecha) UNA vez.
+// Al buscar, el nombre se dice por tu auricular. No necesita internet.
+const L = `ana|Gracia, compasión (hebreo)
+maria|Amada, elegida por Dios
+sofia|Sabiduría (griego)
+laura|Laurel, símbolo de victoria
+carlos|Hombre libre y fuerte
+juan|Dios es misericordioso
+luis|Guerrero glorioso
+pedro|Piedra, roca
+jose|Que Dios aumente
+miguel|¿Quién como Dios?
+daniel|Dios es mi juez
+david|Amado
+camila|Joven de noble linaje que sirve en el templo
+camilo|Ayudante del templo, mensajero
+valentina|Valiente, fuerte, saludable
+isabella|Dios es mi juramento
+isabel|Dios es mi juramento
+lucia|Luz, la que nace con el día
+andrea|Valiente, viril
+andres|Valiente, varonil
+diego|Instruido, el que enseña
+sara|Princesa
+paula|Pequeña, humilde
+pablo|Pequeño, humilde
+jorge|Agricultor, el que trabaja la tierra
+manuel|Dios con nosotros
+rosa|Flor, símbolo de belleza y amor
+elena|Antorcha brillante
+mateo|Regalo de Dios
+santiago|El que sigue a Dios
+sebastian|Venerable, respetado
+gabriel|Dios es mi fuerza
+gabriela|Dios es mi fuerza
+ricardo|Gobernante poderoso y valiente
+alejandro|Defensor de la humanidad
+alejandra|Defensora de la humanidad
+fernando|Audaz en la paz
+patricia|De noble familia
+natalia|Nacida en Navidad
+carolina|Mujer libre y fuerte
+angel|Mensajero de Dios
+eduardo|Guardián de la riqueza
+victor|Vencedor
+vanessa|Mariposa
+jesus|Dios salva
+antonio|Digno de elogio
+wilmer|Protector decidido (germánico)
+wilmary|Protectora de voluntad firme
+yessenia|Flor de la tierra (árabe)
+jhon|Dios es misericordioso
+john|Dios es misericordioso
+milagros|Prodigio, regalo del cielo
+rocio|Gotas de agua en la mañana
+luz|Claridad, la que ilumina
+alonso|Noble y preparado para la batalla
+rodrigo|Gobernante famoso
+yaritza|La que brilla con luz propia
+brayan|Fuerte y virtuoso (celta)
+kevin|Gentil, amable (celta)
+jhoselyn|Campeona alegre
+lizbeth|Promesa de Dios
+piero|Piedra firme
+anahi|Aquella que atrae la atención (guaraní)
+thiago|El que sigue a Dios
+aldair|Noble águila
+fiorella|Florecita
+xiomara|Lista para la batalla
+mayra|Amada, admirada
+nayely|La que ama a Dios
+inti|Sol (quechua)
+killa|Luna (quechua)
+wayra|Viento (quechua)
+sumaq|Hermosa (quechua)
+atahualpa|Ave de la fortuna (quechua)
+tupac|Resplandeciente (quechua)
+yuri|Granjero, el que trabaja la tierra
+yorbis|Hombre de las tierras altas
+yusmary|La que trae paz y gracia
+yulimar|Joven que brilla como el mar
+maikel|¿Quién como Dios?
+dayana|Divina, la luz del día
+yohan|Dios es misericordioso
+genesis|Origen, comienzo de todo
+eliezer|Dios es mi ayuda
+anyelo|Mensajero divino
+yoselin|Joven noble y alegre
+maribel|Hermosa y amada
+yonathan|Regalo de Dios
+rafael|Dios ha sanado
+oswaldo|Poder divino
+nelson|Hijo del campeón
+hugo|Mente brillante, inteligente
+simon|El que escucha
+guadalupe|Río de lobos, valle oculto
+itzel|Estrella de la mañana (maya)
+xochitl|Flor (náhuatl)
+citlali|Estrella (náhuatl)
+cuauhtemoc|Águila que desciende (náhuatl)
+yaretzi|La que siempre será amada
+ximena|La que escucha
+renata|Renacida
+emiliano|Trabajador, rival
+santino|Pequeño santo
+joaquin|Dios establecerá
+facundo|Elocuente, el que habla bien
+lautaro|Audaz y veloz (mapuche)
+morena|De piel morena, bella
+agustina|Venerable, majestuosa
+tomas|Gemelo
+nicolas|Victoria del pueblo
+martin|Consagrado a Marte, guerrero
+lucas|Luminoso
+mauricio|De piel oscura, moro
+esteban|Coronado, victorioso
+cristian|Seguidor de Cristo
+johana|Dios es misericordioso
+katherine|Pura, sin mancha
+stephanie|Coronada
+adriana|De la ciudad del mar
+mariana|Amada y elegida
+daniela|Dios es mi juez
+fabiola|Mujer que cultiva habas
+claudia|Valiente, que camina con firmeza
+veronica|Portadora de la victoria
+sandra|Defensora de la humanidad
+monica|Consejera, única
+liliana|Lirio, flor pura
+karina|Pura, querida
+marcela|Guerrera, consagrada a Marte
+susana|Lirio blanco
+yesenia|Flor de la tierra
+yolanda|Flor violeta
+ingrid|Hermosa, hija del dios
+oscar|Lanza divina
+omar|Longevo, floreciente
+raul|Lobo sabio
+sergio|Guardián
+ivan|Dios es misericordioso
+jaime|El que suplanta
+julio|Joven, consagrado a Júpiter
+cesar|Emperador, cabellera larga
+ruben|Mira, un hijo
+gustavo|Báculo de los dioses
+armando|Hombre de armas
+felipe|Amante de los caballos
+francisco|Libre
+enrique|Gobernante del hogar
+alberto|Noble y brillante
+alfredo|Consejero sabio
+mario|Varonil, consagrado a Marte
+javier|Dueño de la casa nueva
+ramon|Protector sabio
+roberto|Famoso y brillante
+tatiana|Princesa, hija del rey
+jimena|La que escucha
+brenda|Espada de fuego
+mia|Mía, la amada
+emma|Universal, completa
+valeria|Valiente, saludable
+paola|Pequeña
+karla|Mujer libre
+jazmin|Flor perfumada
+estefania|Coronada de gloria
+nicole|Victoria del pueblo
+dilan|Hijo del mar
+dylan|Hijo del mar
+thomas|Gemelo
+liam|Protector decidido
+noah|Descanso, paz
+ethan|Firme, fuerte
+bruno|De piel morena, escudo
+bianca|Blanca, pura
+alan|Armonía, roca pequeña
+alex|Defensor de la humanidad
+ariel|León de Dios
+josue|Dios es salvación
+samuel|Su nombre es Dios
+isaac|El que ríe
+abraham|Padre de multitudes
+ismael|Dios escucha
+elias|Mi Dios es Yahvé
+emanuel|Dios con nosotros
+ezequiel|Dios fortalece
+benjamin|Hijo de la derecha, el predilecto
+leonardo|Valiente como un león
+leo|León
+maximiliano|El más grande
+dario|El que posee el bien
+franco|Libre
+ian|Dios es misericordioso
+kenneth|Hermoso, ardiente
+sheyla|Ciega, la de la luz tenue
+yadira|Amiga, querida
+yanira|Dios ha respondido
+ruth|Amiga fiel
+esther|Estrella
+raquel|Oveja de Dios
+rebeca|La que une
+abigail|La alegría del padre
+noemi|Dulzura, mi felicidad
+lorena|De Lorena, laurel
+cecilia|Ciega, la de la música
+gloria|Fama, honor
+beatriz|La que trae felicidad
+irene|Paz
+olga|Santa
+marta|Señora de la casa
+silvia|De la selva
+teresa|Cosechadora
+violeta|Flor violeta
+alicia|De noble linaje
+amanda|Digna de ser amada
+antonella|Inestimable, digna de elogio
+fatima|La que destetó, radiante
+gisela|Promesa, rehén noble
+mercedes|Misericordias
+pilar|Columna, sostén
+soledad|Soledad, la que se sostiene sola
+nancy|Gracia
+nelly|Antorcha
+elvis|Todo sabio
+elvira|Sincera y leal
+erika|Eterna gobernante
+cindy|Luna
+vicky|Victoria
+sofi|Sabiduría
+lupe|Valle de lobos`.split("\n").reduce((o,l)=>{const [k,v]=l.split("|");o[k]=v;return o;},{});
+const OR = ["latín","griego","hebreo","quechua","náhuatl","guaraní","germánico","árabe","celta","maya"];
+const SG = ["El que ilumina el camino","Portador de buena fortuna","Corazón valiente","Guardián de los sueños","Espíritu libre","El que trae alegría","Mente brillante","El que une a su gente","Voz de la verdad","El que florece en tiempos difíciles","Protector de su familia","Estrella que guía","Fuerza serena","Portador de esperanza"];
+const norm = s => s.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+function hash(s){let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return h;}
+function significado(raw){
+  const k = norm(raw);
+  if(L[k]) return L[k]+".";
+  const h = hash(k);
+  return "Del "+OR[h%OR.length]+": «"+SG[(h>>3)%SG.length]+"». Nombre poco común, asociado a personas de carácter fuerte y sensible.";
+}
+function decir(x){
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(x);
+  u.lang = "es-ES"; u.rate = 0.9;
+  speechSynthesis.speak(u);
+}
+document.getElementById("a").onclick = () => {
+  speechSynthesis.speak(new SpeechSynthesisUtterance(" "));
+  navigator.wakeLock && navigator.wakeLock.request("screen").catch(()=>{});
+};
+function buscar(){
+  const raw = document.getElementById("n").value.trim();
+  if(!raw) return;
+  decir(raw);
+  const nombre = raw.charAt(0).toUpperCase()+raw.slice(1).toLowerCase();
+  const r = document.getElementById("res");
+  r.innerHTML = "<h2>"+nombre.replace(/</g,"&lt;")+"</h2><div>"+significado(raw)+"</div>";
+  r.style.display = "block";
+}
+document.getElementById("b").onclick = buscar;
+document.getElementById("n").addEventListener("keydown",e=>{if(e.key==="Enter")buscar();});
+</script>
+</body>
+</html>
