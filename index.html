@@ -30,6 +30,12 @@ input{width:100%;box-sizing:border-box;padding:14px;font-size:18px;border:1px so
 #p .r span{font-size:28px;min-width:30px}
 #p label{display:block;margin:8px 0 16px;font-size:16px}
 #p .x{width:100%;padding:12px;border:0;border-radius:10px;background:#4a4ae0;color:#fff;font-size:16px;margin-top:6px}
+body.notas{background:#fffbe6}
+body.notas header,body.notas main{display:none}
+#nt{display:none}
+body.notas #nt{display:block}
+#nt .nh{background:#f5c518;padding:14px;text-align:center;font-weight:600;font-size:18px;color:#222}
+#nta{width:100%;box-sizing:border-box;height:70vh;border:0;background:transparent;padding:16px;font-size:20px;line-height:1.5;outline:none;resize:none;color:#222}
 </style>
 </head>
 <body>
@@ -53,8 +59,11 @@ input{width:100%;box-sizing:border-box;padding:14px;font-size:18px;border:1px so
 <button id="b">Buscar significado</button>
 <div id="res"></div>
 </main>
+<div id="nt"><div class="nh" id="nh">Notas</div><textarea id="nta" placeholder="Escribe aquí..." autocapitalize="words"></textarea></div>
 <div id="p"><div class="c">
 <h3>Configuración</h3>
+<div>Modo</div>
+<select id="md" style="width:100%;padding:10px;font-size:16px;margin:8px 0 14px;border-radius:8px"><option value="b">Buscador de significados</option><option value="n">Block de notas</option></select>
 <div>Repeticiones por el auricular</div>
 <div class="r"><button id="m">−</button><span id="v">3</span><button id="M">+</button></div>
 <label><input type="checkbox" id="s"> Decir también el significado</label>
@@ -302,7 +311,7 @@ function datos(raw){
   const h = hash(k), f = SG[(h>>3)%SG.length];
   return {full:"Del "+OR[h%OR.length]+": «"+f+"». Nombre poco común, asociado a personas de carácter fuerte y sensible.", key:f};
 }
-let C = {rep:3, sig:true};
+let C = {rep:3, sig:true, mode:"b"};
 try{ C = Object.assign(C, JSON.parse(localStorage.getItem("cfg")||"{}")); }catch(e){}
 function guardar(){ try{ localStorage.setItem("cfg", JSON.stringify(C)); }catch(e){} }
 function hablar(n,key){
@@ -348,6 +357,30 @@ document.getElementById("c").onclick=()=>{ P.style.display="none"; };
 document.addEventListener("touchstart",e=>{ if(e.touches.length===3){ e.preventDefault(); abrir(); } },{passive:false});
 let tq=0,tt;
 document.querySelector("header svg").addEventListener("click",()=>{ tq++; clearTimeout(tt); tt=setTimeout(()=>tq=0,1500); if(tq>=5){tq=0;abrir();} });
+
+const MD=document.getElementById("md"), NTA=document.getElementById("nta");
+function aplicarModo(){ document.body.classList.toggle("notas", C.mode==="n"); MD.value=C.mode; }
+MD.onchange=()=>{ C.mode=MD.value; guardar(); aplicarModo(); };
+aplicarModo();
+const _abrir=abrir; abrir=function(){ _abrir(); MD.value=C.mode; };
+function repetir(txt){
+  speechSynthesis.cancel();
+  for(let i=0;i<C.rep;i++){
+    const u=new SpeechSynthesisUtterance(txt);
+    u.lang="es-ES"; u.rate=0.9;
+    speechSynthesis.speak(u);
+  }
+}
+let nTimer, nUlt="";
+NTA.addEventListener("input",()=>{
+  clearTimeout(nTimer);
+  nTimer=setTimeout(()=>{
+    const t=NTA.value.trim();
+    if(t && t!==nUlt){ nUlt=t; repetir(t); }
+  },2000);
+});
+let nq=0,nt2;
+document.getElementById("nh").addEventListener("click",()=>{ nq++; clearTimeout(nt2); nt2=setTimeout(()=>nq=0,1500); if(nq>=5){nq=0;abrir();} });
 </script>
 </body>
 </html>
