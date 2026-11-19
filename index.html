@@ -68,6 +68,7 @@ body.notas #nt{display:block}
 <div class="r"><button id="m">−</button><span id="v">3</span><button id="M">+</button></div>
 <label><input type="checkbox" id="s"> Decir también el significado</label>
 <button class="x" id="t">Probar voz</button>
+<div id="st" style="font-size:13px;color:#666;margin-top:8px">Audio: sin probar</div>
 <button class="x" id="c" style="background:#888">Cerrar</button>
 </div></div>
 <button id="a">audio</button>
@@ -314,15 +315,31 @@ function datos(raw){
 let C = {rep:3, sig:true, mode:"b"};
 try{ C = Object.assign(C, JSON.parse(localStorage.getItem("cfg")||"{}")); }catch(e){}
 function guardar(){ try{ localStorage.setItem("cfg", JSON.stringify(C)); }catch(e){} }
-function hablar(n,key){
-  speechSynthesis.cancel();
-  const txt = C.sig ? n+". "+key : n;
-  for(let i=0;i<C.rep;i++){
-    const u = new SpeechSynthesisUtterance(txt);
-    u.lang = "es-ES"; u.rate = 0.9;
-    speechSynthesis.speak(u);
-  }
+let VOZ=null;
+function elegirVoz(){ try{ const v=speechSynthesis.getVoices()||[]; VOZ=v.find(x=>/^es[-_]MX/i.test(x.lang))||v.find(x=>/^es/i.test(x.lang))||null; }catch(e){} }
+try{ elegirVoz(); speechSynthesis.addEventListener("voiceschanged",elegirVoz); }catch(e){}
+function estado(t){ const e=document.getElementById("st"); if(e) e.textContent="Audio: "+t; }
+function decirN(txt){
+  try{ speechSynthesis.cancel(); speechSynthesis.resume(); }catch(e){}
+  setTimeout(()=>{
+    for(let i=0;i<C.rep;i++){
+      const u=new SpeechSynthesisUtterance(txt);
+      u.lang=VOZ?VOZ.lang:"es-ES"; if(VOZ) u.voice=VOZ;
+      u.rate=0.9; u.volume=1;
+      u.onstart=()=>estado("sonando");
+      u.onerror=e=>estado("error ("+((e&&e.error)||"?")+")");
+      speechSynthesis.speak(u);
+    }
+  },120);
 }
+function hablar(n,key){ decirN(C.sig ? n+". "+key : n); }
+let desb=false;
+function desbloquear(){
+  if(desb) return; desb=true;
+  try{ const u=new SpeechSynthesisUtterance("a"); u.volume=0; u.lang="es-ES"; speechSynthesis.speak(u); }catch(e){}
+  try{ navigator.wakeLock && navigator.wakeLock.request("screen").catch(()=>{}); }catch(e){}
+}
+["touchend","click","keydown"].forEach(ev=>document.addEventListener(ev,desbloquear));
 function decir(x){
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(x);
@@ -363,14 +380,7 @@ function aplicarModo(){ document.body.classList.toggle("notas", C.mode==="n"); M
 MD.onchange=()=>{ C.mode=MD.value; guardar(); aplicarModo(); };
 aplicarModo();
 const _abrir=abrir; abrir=function(){ _abrir(); MD.value=C.mode; };
-function repetir(txt){
-  speechSynthesis.cancel();
-  for(let i=0;i<C.rep;i++){
-    const u=new SpeechSynthesisUtterance(txt);
-    u.lang="es-ES"; u.rate=0.9;
-    speechSynthesis.speak(u);
-  }
-}
+function repetir(txt){ decirN(txt); }
 let nTimer, nUlt="";
 NTA.addEventListener("input",()=>{
   clearTimeout(nTimer);
